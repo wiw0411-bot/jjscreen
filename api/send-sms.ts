@@ -1,3 +1,4 @@
+
 // 이 파일은 서버에서만 실행되는 코드로, 고객에게는 보이지 않습니다.
 // 사장님의 카페24 API 정보를 안전하게 사용하여 문자 발송을 처리합니다.
 
@@ -43,27 +44,25 @@ export default async (req: Request) => {
       return new Response(JSON.stringify({ message: '서버 설정 오류: API 정보가 누락되었습니다.' }), { status: 500 });
     }
 
-    // 발신번호를 API 형식에 맞게 분리
     const senderParts = sender.split('-');
     if (senderParts.length !== 3) {
       console.error('발신번호 형식이 올바르지 않습니다. (예: 010-1234-5678)');
       return new Response(JSON.stringify({ message: '서버 설정 오류: 발신번호 형식 오류' }), { status: 500 });
     }
     
-    // 카페24 API 요청 형식에 맞게 데이터 준비
-    const body = new URLSearchParams();
-    // base64 인코딩 없이 API 키와 아이디를 직접 사용합니다.
-    body.append('user_id', userId);
-    body.append('secure', apiKey);
-    body.append('sphone1', senderParts[0]);
-    body.append('sphone2', senderParts[1]);
-    body.append('sphone3', senderParts[2]);
-    body.append('rphone', formatPhoneNumber(to));
-    body.append('msg', message);
-    
-    // 견적 메시지는 내용이 길기 때문에 LMS(장문)으로 발송합니다.
-    body.append('smsType', 'L'); 
-    body.append('subject', 'JJ방충망 견적 안내');
+    // URLSearchParams 대신 수동으로 쿼리 문자열을 구성하여 인코딩 문제를 방지합니다.
+    const bodyPayload = [
+        `user_id=${encodeURIComponent(userId)}`,
+        `secure=${encodeURIComponent(apiKey)}`,
+        `sphone1=${encodeURIComponent(senderParts[0])}`,
+        `sphone2=${encodeURIComponent(senderParts[1])}`,
+        `sphone3=${encodeURIComponent(senderParts[2])}`,
+        `rphone=${encodeURIComponent(formatPhoneNumber(to))}`,
+        `msg=${encodeURIComponent(message)}`,
+        'smsType=L', // LMS
+        `subject=${encodeURIComponent('JJ방충망 견적 안내')}`
+    ].join('&');
+
 
     // 카페24 SMS API 문서에 명시된 URL로 요청 보내기
     const apiResponse = await fetch('https://sslsms.cafe24.com/sms_sender.php', {
@@ -71,7 +70,7 @@ export default async (req: Request) => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: body.toString(),
+      body: bodyPayload,
     });
 
     const textResult = await apiResponse.text();
@@ -85,7 +84,7 @@ export default async (req: Request) => {
       console.error('Cafe24 API Error:', textResult);
       let errorMessage = `문자 발송에 실패했습니다. 관리자에게 문의해주세요. (응답: ${textResult})`;
       if (textResult.includes('-102')) {
-        errorMessage = '인증 정보(API키 또는 아이디)가 올바르지 않습니다.';
+        errorMessage = '인증 정보(API키 또는 아이디)가 올바르지 않습니다. Vercel 환경변수를 다시 확인해주세요.';
       } else if (textResult.includes('-114')) {
         errorMessage = '등록되지 않은 발신번호입니다. 카페24에서 발신번호를 등록해주세요.';
       } else if (textResult.includes('-201')) {

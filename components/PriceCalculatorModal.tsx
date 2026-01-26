@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 interface Product {
@@ -125,7 +126,12 @@ const SmsRequestModal: React.FC<{onClose: () => void; onConfirm: (phone: string)
                             onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
                             className="w-full px-4 py-3 border border-gray-200 bg-gray-100 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg mb-4 text-center"
                         />
-                         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                         {error && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4 text-left" role="alert">
+                                <strong className="font-bold">전송 실패:</strong>
+                                <span className="block sm:inline ml-2">{error}</span>
+                            </div>
+                        )}
                         <button onClick={handleSubmit} disabled={isLoading} className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg mb-2 disabled:bg-gray-400 disabled:cursor-not-allowed">
                             {isLoading ? '전송 중...' : '견적 문자로 받기'}
                         </button>
