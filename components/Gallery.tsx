@@ -2,7 +2,16 @@
 import React from 'react';
 
 const Gallery: React.FC = () => {
-  const images = Array.from({ length: 8 }, (_, i) => `https://picsum.photos/500/500?random=${i + 10}`);
+  const images = [
+    'https://i.imgur.com/OJjO8ue.jpeg',
+    'https://i.imgur.com/L0Izf0J.jpeg',
+    'https://i.imgur.com/CGFxnWI.jpeg',
+    'https://i.imgur.com/NccQwux.jpeg',
+    'https://i.imgur.com/eykFDw1.jpeg',
+    'https://i.imgur.com/fTjO6vo.jpeg',
+    'https://i.imgur.com/RJcHCVn.jpeg',
+    'https://i.imgur.com/bmJroTk.jpeg'
+  ];
 
   return (
     <section id="gallery" className="py-20 bg-gray-50">
@@ -13,7 +22,7 @@ const Gallery: React.FC = () => {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {images.map((src, index) => (
-            <div key={index} className="overflow-hidden rounded-lg shadow-md group">
+            <div key={index} className="overflow-hidden rounded-lg shadow-md group aspect-square">
               <img 
                 src={src} 
                 alt={`시공 사례 ${index + 1}`} 

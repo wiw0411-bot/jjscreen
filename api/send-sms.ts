@@ -50,14 +50,11 @@ export default async (req: Request) => {
       return new Response(JSON.stringify({ message: '서버 설정 오류: 발신번호 형식 오류' }), { status: 500 });
     }
     
-    // 카페24 API 문서에 따라 user_id와 secure(인증키)는 base64 인코딩이 필요합니다.
-    const encodedUserId = btoa(userId);
-    const encodedApiKey = btoa(apiKey);
-    
     // 카페24 API 요청 형식에 맞게 데이터 준비
     const body = new URLSearchParams();
-    body.append('user_id', encodedUserId);
-    body.append('secure', encodedApiKey);
+    // base64 인코딩 없이 API 키와 아이디를 직접 사용합니다.
+    body.append('user_id', userId);
+    body.append('secure', apiKey);
     body.append('sphone1', senderParts[0]);
     body.append('sphone2', senderParts[1]);
     body.append('sphone3', senderParts[2]);
