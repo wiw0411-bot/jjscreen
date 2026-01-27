@@ -1,24 +1,24 @@
 
 // 이 파일은 서버에서만 실행되는 코드로, 고객에게는 보이지 않습니다.
-// 사장님의 카페24 API 정보를 안전하게 사용하여 문자 발송을 처리합니다.
+// 사장님의 솔라피(Solapi) API 정보를 안전하게 사용하여 문자 발송을 처리합니다.
 
 export const config = {
   runtime: 'edge',
 };
 
-// 휴대폰 번호 형식(010-1234-5678)으로 변환하는 함수
-function formatPhoneNumber(phone: string): string {
-    const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length === 11) {
-      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7)}`;
-    }
-    if (cleaned.length === 10) {
-      if (cleaned.startsWith('02')) {
-          return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
-      }
-      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-    }
-    return cleaned; // 10, 11자리가 아니면 그냥 반환
+// Solapi API 인증을 위한 HMAC-SHA256 시그니처 생성 함수 (Web Crypto API 사용)
+async function getSolapiSignature(apiSecret: string, date: string, salt: string): Promise<string> {
+    const message = date + salt;
+    const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(apiSecret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message));
+    // ArrayBuffer를 hex 문자열로 변환
+    return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 
@@ -34,67 +34,52 @@ export default async (req: Request) => {
       return new Response(JSON.stringify({ message: '수신자 번호와 메시지 내용은 필수입니다.' }), { status: 400 });
     }
 
-    // --- 배포 환경의 환경 변수에서 안전하게 API 정보 불러오기 ---
-    const apiKey = process.env.CAFE24_API_KEY;
-    const userId = process.env.CAFE24_USER_ID;
-    const sender = '010-2846-9820'; // 카페24에 등록된 발신번호
+    // --- Vercel 환경 변수에서 Solapi API 정보 불러오기 ---
+    const apiKey = process.env.SOLAPI_API_KEY;
+    const apiSecret = process.env.SOLAPI_API_SECRET;
+    const sender = process.env.SOLAPI_SENDER_NUMBER;
 
-    if (!apiKey || !userId) {
-      console.error('환경 변수에 API 키 또는 사용자 ID가 설정되지 않았습니다.');
-      return new Response(JSON.stringify({ message: '서버 설정 오류: API 정보가 누락되었습니다.' }), { status: 500 });
+    if (!apiKey || !apiSecret || !sender) {
+      console.error('환경 변수에 Solapi 정보가 설정되지 않았습니다.');
+      return new Response(JSON.stringify({ message: '서버 설정 오류: Vercel 환경변수(SOLAPI_API_KEY, SOLAPI_API_SECRET, SOLAPI_SENDER_NUMBER)가 설정되지 않았습니다.' }), { status: 500 });
     }
 
-    const senderParts = sender.split('-');
-    if (senderParts.length !== 3) {
-      console.error('발신번호 형식이 올바르지 않습니다. (예: 010-1234-5678)');
-      return new Response(JSON.stringify({ message: '서버 설정 오류: 발신번호 형식 오류' }), { status: 500 });
-    }
+    const date = new Date().toISOString();
+    const salt = crypto.randomUUID().replace(/-/g, '');
+    const signature = await getSolapiSignature(apiSecret, date, salt);
     
-    // URLSearchParams 대신 수동으로 쿼리 문자열을 구성하여 인코딩 문제를 방지합니다.
-    const bodyPayload = [
-        `user_id=${encodeURIComponent(userId)}`,
-        `secure=${encodeURIComponent(apiKey)}`,
-        `sphone1=${encodeURIComponent(senderParts[0])}`,
-        `sphone2=${encodeURIComponent(senderParts[1])}`,
-        `sphone3=${encodeURIComponent(senderParts[2])}`,
-        `rphone=${encodeURIComponent(formatPhoneNumber(to))}`,
-        `msg=${encodeURIComponent(message)}`,
-        'smsType=L', // LMS
-        `subject=${encodeURIComponent('JJ방충망 견적 안내')}`
-    ].join('&');
+    const authorizationHeader = `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${signature}`;
 
-
-    // 카페24 SMS API 문서에 명시된 URL로 요청 보내기
-    const apiResponse = await fetch('https://sslsms.cafe24.com/sms_sender.php', {
+    const response = await fetch('https://api.solapi.com/messages/v4/send', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': authorizationHeader,
+        'Content-Type': 'application/json',
       },
-      body: bodyPayload,
+      body: JSON.stringify({
+        message: {
+          to: to.replace(/-/g, ''),
+          from: sender.replace(/-/g, ''),
+          text: message,
+          // Solapi는 문자 길이에 따라 SMS/LMS/MMS를 자동으로 결정합니다.
+        },
+      }),
     });
 
-    const textResult = await apiResponse.text();
-    
-    // 카페24 응답 형식은 "resultcode=결과코드"와 같은 텍스트입니다.
-    // 성공 시: success 또는 reserved
-    // 실패 시: 음수 코드
-    if (textResult.includes('success') || textResult.includes('reserved')) {
+    const result = await response.json();
+
+    // Solapi 성공 코드 '2000' 확인
+    if (response.ok && result.statusCode === '2000') {
       return new Response(JSON.stringify({ success: true, message: '문자가 성공적으로 발송되었습니다.' }), { status: 200 });
     } else {
-      console.error('Cafe24 API Error:', textResult);
-      let errorMessage = `문자 발송에 실패했습니다. 관리자에게 문의해주세요. (응답: ${textResult})`;
-      if (textResult.includes('-102')) {
-        errorMessage = '인증 정보(API키 또는 아이디)가 올바르지 않습니다. Vercel 환경변수를 다시 확인해주세요.';
-      } else if (textResult.includes('-114')) {
-        errorMessage = '등록되지 않은 발신번호입니다. 카페24에서 발신번호를 등록해주세요.';
-      } else if (textResult.includes('-201')) {
-        errorMessage = '문자 잔여 건수가 부족합니다. 카페24에서 충전 후 다시 시도해주세요.';
-      }
-      return new Response(JSON.stringify({ success: false, message: errorMessage }), { status: 500 });
+      console.error('Solapi API Error:', result);
+      const errorMessage = result.statusMessage || '문자 발송에 실패했습니다. 관리자에게 문의해주세요.';
+      return new Response(JSON.stringify({ success: false, message: errorMessage }), { status: response.status });
     }
 
   } catch (error) {
     console.error('SMS 발송 중 서버 오류 발생:', error);
-    return new Response(JSON.stringify({ message: '내부 서버 오류가 발생했습니다.' }), { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ message: `내부 서버 오류가 발생했습니다: ${errorMessage}` }), { status: 500 });
   }
 };

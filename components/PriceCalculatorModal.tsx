@@ -91,9 +91,9 @@ const SmsRequestModal: React.FC<{onClose: () => void; onConfirm: (phone: string)
         } catch (err: any) {
             console.error('SMS request submission failed:', err);
             if (err.message === 'timeout') {
-                setError('전송 시간이 초과되었습니다. 미리보기 환경에서는 외부 API 호출이 제한될 수 있습니다.');
+                setError('전송 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.');
             } else {
-                setError(err.message || '견적 문자 발송에 실패했습니다. 잠시 후 다시 시도해주세요.');
+                setError(err.message || '견적 문자 발송에 실패했습니다. Vercel 환경변수 또는 솔라피 잔액을 확인해주세요.');
             }
         } finally {
             setIsLoading(false);

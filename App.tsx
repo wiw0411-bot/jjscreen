@@ -7,6 +7,7 @@ import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import KakaoChatButton from './components/KakaoChatButton';
+import ContactForm from './components/ContactForm';
 
 const App: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const App: React.FC = () => {
         <Features />
         <Testimonials />
         <FAQ />
+        <ContactForm />
       </main>
       <KakaoChatButton />
       <Footer />
