@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface FaqItemProps {
@@ -45,7 +46,7 @@ const FAQ: React.FC = () => {
     {
       number: '05',
       title: '방충망 제품',
-      description: ['낚시줄 재질로 된 모노필라멘트 사용', '부식 없이 반영구적 사용 가능하며,', '미세방충망이기에 미세벌레 차단까지 가능'],
+      description: ['모노필라멘트 미세방충망,블랙스텐망 사용'],
     },
     {
       number: '06',
