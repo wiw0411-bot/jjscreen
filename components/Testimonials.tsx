@@ -1,20 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface TestimonialCardProps {
   image: string;
   title: string;
   text: string;
+  isVisible: boolean;
+  onTypingComplete: () => void;
 }
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ image, title, text }) => {
+const TestimonialCard: React.FC<TestimonialCardProps> = ({ image, title, text, isVisible, onTypingComplete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [animationTriggered, setAnimationTriggered] = useState(false);
+
+  // onTypingComplete 콜백이 변경되어도 애니메이션이 재시작되지 않도록 ref에 최신 함수를 저장합니다.
+  const onTypingCompleteRef = useRef(onTypingComplete);
+  useEffect(() => {
+    onTypingCompleteRef.current = onTypingComplete;
+  }, [onTypingComplete]);
   
   const truncateLength = 75;
   const isTruncatable = text.length > truncateLength;
-  const displayText = isExpanded ? text : `${text.substring(0, truncateLength)}${isTruncatable ? '...' : ''}`;
+  const shortText = `${text.substring(0, truncateLength)}${isTruncatable ? '...' : ''}`;
+  
+  // 1. 카드가 화면에 보이면 애니메이션을 딱 한 번 트리거합니다.
+  useEffect(() => {
+    if (isVisible && !animationTriggered) {
+        setAnimationTriggered(true);
+    }
+  }, [isVisible, animationTriggered]);
+
+  // 2. 애니메이션이 트리거되면 타이핑 효과를 실행합니다.
+  useEffect(() => {
+    if (animationTriggered) {
+        let i = 0;
+        const targetText = shortText;
+        const intervalId = setInterval(() => {
+            if (i < targetText.length) {
+                setTypedText(targetText.substring(0, i + 1));
+                i++;
+            } else {
+                clearInterval(intervalId);
+                onTypingCompleteRef.current(); // ref에 저장된 최신 콜백을 실행합니다.
+            }
+        }, 15);
+
+        return () => clearInterval(intervalId);
+    }
+  }, [animationTriggered, shortText]);
+
+  const displayText = isExpanded ? text : typedText;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-start gap-4 shadow-sm transition-shadow hover:shadow-md">
+    <div className={`bg-white rounded-lg border border-gray-200 p-4 flex items-start gap-4 shadow-sm transition-all duration-500 hover:shadow-md ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       <img src={image} alt={title} className="w-24 h-24 md:w-28 md:h-28 object-cover rounded-md flex-shrink-0" />
       <div className="flex-grow flex flex-col self-stretch min-w-0">
         <div className="flex items-center mb-1">
@@ -46,6 +84,9 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ image, title, text })
 };
 
 const Testimonials: React.FC = () => {
+  const [visibleCardIndex, setVisibleCardIndex] = useState(-1);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
   const testimonials = [
     {
       image: 'https://i.imgur.com/OJjO8ue.jpeg',
@@ -79,8 +120,40 @@ const Testimonials: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCardIndex(0);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
+  const handleTypingComplete = useCallback(() => {
+    setVisibleCardIndex(prevIndex => {
+        if (prevIndex < testimonials.length - 1) {
+            return prevIndex + 1;
+        }
+        return prevIndex;
+    });
+  }, [testimonials.length]);
+
   return (
-    <section id="testimonials" className="py-20 bg-gray-50">
+    <section id="testimonials" ref={sectionRef} className="py-20 bg-gray-50">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold">생생한 시공 후기</h2>
@@ -88,7 +161,12 @@ const Testimonials: React.FC = () => {
         </div>
         <div className="max-w-4xl mx-auto space-y-6">
           {testimonials.slice(0, 6).map((testimonial, index) => (
-            <TestimonialCard key={index} {...testimonial} />
+            <TestimonialCard 
+              key={index} 
+              {...testimonial} 
+              isVisible={index <= visibleCardIndex}
+              onTypingComplete={index === visibleCardIndex ? handleTypingComplete : () => {}}
+            />
           ))}
         </div>
       </div>

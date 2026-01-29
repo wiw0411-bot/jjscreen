@@ -311,7 +311,7 @@ const PriceCalculatorModal: React.FC<PriceCalculatorModalProps> = ({ isOpen, onC
         <div className="p-6 bg-gray-50 border-t border-gray-200 rounded-b-xl">
              <div className="flex items-center space-x-4">
                 <button onClick={handleRequestSms} disabled={!isQuoteValid} className="w-1/2 bg-gray-700 text-white font-bold py-4 px-6 rounded-lg hover:bg-gray-800 transition-colors duration-300 text-base text-center leading-snug disabled:bg-gray-400 disabled:cursor-not-allowed">
-                    견적 저장<br/><span className="text-sm font-normal">(문자 자동발송)</span>
+                    견적 저장<br/><span className="text-sm font-normal">(문자 발송)</span>
                 </button>
                 <a href={`tel:${businessPhoneNumber}`} className="w-1/2 bg-blue-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-base text-center leading-snug">
                     시공문의<br/><span className="text-sm font-normal">(전화걸기)</span>

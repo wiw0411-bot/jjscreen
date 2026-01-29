@@ -1,20 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface FeatureItemProps {
   icon: string;
   title: string;
   description: string;
+  index: number;
 }
 
-const FeatureItem: React.FC<FeatureItemProps> = ({ icon, title, description }) => (
-    <div className="aspect-square text-center p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col items-center justify-center">
-        <div className="text-blue-600 text-3xl mb-3 inline-block">
-            <i className={`fas ${icon}`}></i>
+const FeatureItem: React.FC<FeatureItemProps> = ({ icon, title, description, index }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const itemRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+        ([entry]) => {
+            if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+            }
+        },
+        {
+            threshold: 0.2,
+        }
+        );
+
+        if (itemRef.current) {
+        observer.observe(itemRef.current);
+        }
+
+        return () => {
+        if (itemRef.current) {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            observer.unobserve(itemRef.current);
+        }
+        };
+    }, []);
+
+    return (
+        <div 
+        ref={itemRef}
+        className={`feature-card aspect-square text-center p-4 bg-white rounded-lg shadow-md hover:shadow-xl flex flex-col items-center justify-center ${isVisible ? 'is-visible' : ''}`}
+        style={{ transitionDelay: `${index * 100}ms` }}
+        >
+            <div className="text-blue-600 text-3xl mb-3 inline-block">
+                <i className={`fas ${icon}`}></i>
+            </div>
+            <h3 className="text-base font-semibold mb-2">{title}</h3>
+            <p className="text-sm text-gray-600 px-2">{description}</p>
         </div>
-        <h3 className="text-base font-semibold mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 px-2">{description}</p>
-    </div>
-);
+    );
+};
 
 const Features: React.FC = () => {
   const features = [
@@ -49,7 +84,7 @@ const Features: React.FC = () => {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {features.map((feature, index) => (
-            <FeatureItem key={index} {...feature} />
+            <FeatureItem key={index} {...feature} index={index} />
           ))}
         </div>
       </div>
