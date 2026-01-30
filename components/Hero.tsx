@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PriceCalculatorModal from './PriceCalculatorModal';
 
@@ -21,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ onCheckPrice, ...product }) =
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform hover:shadow-xl transition-shadow duration-300">
       <div className="w-full aspect-square bg-gray-100">
-        <img src={imageUrl} alt={alt} className="w-full h-full object-contain" />
+        <img src={imageUrl} alt={alt} className="w-full h-full object-cover" />
       </div>
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div className="flex-grow">
@@ -82,7 +81,7 @@ const Hero: React.FC = () => {
   return (
     <>
       <section id="products" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="bg-white rounded-xl shadow-md p-6 md:p-8 mb-12 max-w-3xl mx-auto border border-gray-200">
             <div className="text-center">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">대표 상품 및 가격 안내</h1>
@@ -92,7 +91,7 @@ const Hero: React.FC = () => {
                 </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-8 max-w-4xl mx-auto">
             {products.map((product, index) => (
               <ProductCard key={index} {...product} onCheckPrice={handleOpenModal} />
             ))}
