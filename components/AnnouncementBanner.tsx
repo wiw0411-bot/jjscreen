@@ -19,19 +19,21 @@ const AnnouncementBanner: React.FC = () => {
   }, []);
 
   return (
-    <section aria-label="JJ방충망 대표 상품 안내 영상">
-      <video
-        ref={videoRef}
-        src={videoUrl}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="w-full h-auto object-cover"
-        aria-description="JJ방충망의 전문적인 시공 서비스와 대표 상품을 소개하는 동영상 배너"
-      >
-        브라우저가 비디오 태그를 지원하지 않습니다.
-      </video>
+    <section aria-label="JJ방충망 대표 상품 안내 영상" className="lg:py-20 lg:bg-gray-100">
+      <div className="container mx-auto px-0 lg:px-40">
+        <video
+          ref={videoRef}
+          src={videoUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-auto object-cover lg:rounded-xl lg:shadow-xl"
+          aria-description="JJ방충망의 전문적인 시공 서비스와 대표 상품을 소개하는 동영상 배너"
+        >
+          브라우저가 비디오 태그를 지원하지 않습니다.
+        </video>
+      </div>
     </section>
   );
 };
