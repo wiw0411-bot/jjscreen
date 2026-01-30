@@ -19,8 +19,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ onCheckPrice, ...product }) =
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform hover:shadow-xl transition-shadow duration-300">
-      <div className="w-full aspect-square bg-gray-100">
-        <img src={imageUrl} alt={alt} className="w-full h-full object-cover" />
+      <div className="w-full aspect-[4/5] bg-gray-100">
+        <img src={imageUrl} alt={alt} className="w-full h-full object-contain" />
       </div>
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div className="flex-grow">
