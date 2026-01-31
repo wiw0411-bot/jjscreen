@@ -47,6 +47,8 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
     <section className="pt-16 bg-gray-100">
       <div className="container mx-auto px-4 sm:px-6">
         <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
+          <span className="animate-text-shimmer">JJ방충망</span>
+          <br />
           <span className="animate-text-shimmer">실시간 견적 받기</span>
         </h1>
 
