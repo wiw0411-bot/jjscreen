@@ -1,41 +1,120 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const AnnouncementBanner: React.FC = () => {
-  const videoUrl = 'https://i.imgur.com/EdGarY3.mp4';
-  const videoRef = useRef<HTMLVideoElement>(null);
+// 데스크톱용 배너 이미지
+const desktopBannerImages = [
+  'https://i.imgur.com/7YYqsAe.jpeg',
+  'https://i.imgur.com/wGBmXCL.jpeg',
+  'https://i.imgur.com/TOXF1UJ.jpeg',
+];
 
-  // 모바일 브라우저의 자동 재생 정책에 더 강력하게 대응하기 위한 코드
+// 모바일용 배너 이미지
+const mobileBannerImages = [
+  'https://i.imgur.com/twgL7Qg.jpeg',
+  'https://i.imgur.com/mo0ewWR.jpeg',
+  'https://i.imgur.com/Q9rr2Dc.jpeg',
+];
+
+// 화면 너비를 감지하여 모바일 여부를 반환하는 커스텀 훅
+const useIsMobile = (breakpoint = 768) => {
+    const isClient = typeof window === 'object';
+    const [isMobile, setIsMobile] = useState(isClient ? window.innerWidth < breakpoint : false);
+
+    useEffect(() => {
+        if (!isClient) {
+            return;
+        }
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < breakpoint);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [breakpoint, isClient]);
+
+    return isMobile;
+};
+
+const SlidingBanner: React.FC = () => {
+  const isMobile = useIsMobile();
+  const bannerImages = isMobile ? mobileBannerImages : desktopBannerImages;
+  
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // 화면 크기 변경으로 이미지 목록이 바뀔 때 인덱스 초기화
   useEffect(() => {
-    const videoElement = videoRef.current;
-    if (videoElement) {
-      // play()는 Promise를 반환하며, 자동 재생이 차단되면 reject됩니다.
-      // 이 코드를 통해 브라우저에게 재생 의도를 명확히 전달합니다.
-      videoElement.play().catch(error => {
-        // 자동 재생이 브라우저 정책(예: 저전력 모드)에 의해 막힌 경우입니다.
-        // 이 경우 브라우저가 기본 재생 버튼을 보여주게 됩니다.
-        console.warn("영상 자동 재생이 브라우저 정책에 의해 차단되었습니다:", error);
-      });
-    }
-  }, []);
+    setCurrentIndex(0);
+  }, [isMobile]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
+    }, 4000); // 4초마다 배너 변경
+
+    return () => clearInterval(timer);
+  }, [bannerImages.length]);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + bannerImages.length) % bannerImages.length);
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
+  };
 
   return (
-    <section aria-label="JJ방충망 대표 상품 안내 영상" className="lg:py-20 lg:bg-gray-100">
-      <div className="container mx-auto px-0 lg:px-40">
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-auto object-cover lg:rounded-xl lg:shadow-xl"
-          aria-description="JJ방충망의 전문적인 시공 서비스와 대표 상품을 소개하는 동영상 배너"
+    <section aria-label="주요 서비스 안내" className="relative w-full bg-gray-200 overflow-hidden">
+      <div className="overflow-hidden relative h-24 sm:h-36 md:h-44">
+        <div 
+          className="flex absolute top-0 left-0 w-full h-full transition-transform duration-700 ease-in-out"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
-          브라우저가 비디오 태그를 지원하지 않습니다.
-        </video>
+          {bannerImages.map((src, index) => (
+            <div key={index} className="w-full flex-shrink-0 h-full overflow-hidden">
+              <img 
+                src={src} 
+                alt={`JJ방충망 프로모션 배너 ${index + 1}`} 
+                className="w-full h-full object-cover transform scale-105" 
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button
+        onClick={goToPrevious}
+        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
+        aria-label="이전 배너 보기"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        onClick={goToNext}
+        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
+        aria-label="다음 배너 보기"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+        {bannerImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+              index === currentIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
+            }`}
+            aria-label={`배너 ${index + 1}로 이동`}
+          ></button>
+        ))}
       </div>
     </section>
   );
 };
 
-export default AnnouncementBanner;
+export default SlidingBanner;

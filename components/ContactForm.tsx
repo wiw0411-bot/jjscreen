@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const ContactForm: React.FC = () => {
@@ -11,13 +10,13 @@ const ContactForm: React.FC = () => {
       <div className="container mx-auto px-6">
         <div className="lg:flex lg:items-center lg:justify-between">
           <div className="lg:w-1/2 lg:pr-12 mb-12 lg:mb-0">
-            <h2 className="text-3xl md:text-4xl font-bold">지금 바로 상담하세요</h2>
-            <p className="text-lg text-gray-600 mt-4 mb-6">
-              궁금한 점이 있으신가요? 전화 또는 카카오톡으로 문의주시면
+            <h2 className="text-xl md:text-3xl font-bold">지금 바로 상담하세요</h2>
+            <p className="text-sm md:text-base text-gray-600 mt-4 mb-6">
+              궁금한 점이 있으신가요? 전화 또는 카카오톡으로 문의주시면{' '}
               <br className="hidden sm:block" />
               신속하고 친절하게 상담해드리겠습니다.
             </p>
-            <div className="space-y-4 text-lg">
+            <div className="space-y-4 text-base">
               <p className="flex items-center">
                 <i className="fas fa-phone-alt text-blue-600 mr-4"></i>
                 <a href={`tel:${businessPhoneNumber}`} className="text-gray-800 hover:text-blue-600">{businessPhoneNumber}</a>
@@ -32,7 +31,7 @@ const ContactForm: React.FC = () => {
             <div className="bg-gray-50 p-8 rounded-lg shadow-lg space-y-4">
                <a 
                 href={`tel:${businessPhoneNumber}`}
-                className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 text-lg transform hover:scale-105"
+                className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 text-base transform hover:scale-105"
               >
                 <i className="fas fa-phone-alt mr-3"></i>
                 전화 상담하기
@@ -41,7 +40,7 @@ const ContactForm: React.FC = () => {
                 href={kakaoChatUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center bg-[#FEE500] text-[#3C1E1E] font-bold py-4 px-6 rounded-lg hover:bg-yellow-400 transition-all duration-300 text-lg transform hover:scale-105"
+                className="w-full flex items-center justify-center bg-[#FEE500] text-[#3C1E1E] font-bold py-4 px-6 rounded-lg hover:bg-yellow-400 transition-all duration-300 text-base transform hover:scale-105"
               >
                 <svg
                     className="w-6 h-6 mr-3"

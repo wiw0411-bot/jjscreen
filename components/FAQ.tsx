@@ -1,19 +1,19 @@
-
 import React from 'react';
 
 interface FaqItemProps {
   number: string;
   title: string;
   description: string[];
+  bgColor: string;
 }
 
-const FaqItem: React.FC<FaqItemProps> = ({ number, title, description }) => (
-  <div className="group flex flex-col text-left p-4 bg-gray-50 rounded-lg border border-gray-200 h-full transition-all duration-300 hover:shadow-lg hover:border-blue-500">
+const FaqItem: React.FC<FaqItemProps> = ({ number, title, description, bgColor }) => (
+  <div className={`group flex flex-col text-left p-4 ${bgColor} rounded-lg border border-transparent h-full transition-all duration-300 hover:shadow-lg hover:border-blue-500`}>
     <span className="text-3xl font-light text-gray-400 mb-3 transition-colors duration-300 group-hover:text-blue-600">{number}</span>
-    <h3 className="text-base font-bold text-gray-900 mb-2 relative inline-block pb-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-blue-600">
+    <h3 className="text-sm font-bold text-gray-900 mb-2 relative inline-block pb-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-blue-600">
         {title}
     </h3>
-    <div className="text-gray-600 text-xs space-y-1 break-keep">
+    <div className="text-gray-600 text-[11px] space-y-1 break-keep">
         {description.map((line, index) => (
             <p key={index}>{line}</p>
         ))}
@@ -77,7 +77,7 @@ const FAQ: React.FC = () => {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-7xl mx-auto">
           {faqData.map((item, index) => (
-            <FaqItem key={index} {...item} />
+            <FaqItem key={index} {...item} bgColor="bg-cyan-50" />
           ))}
         </div>
       </div>

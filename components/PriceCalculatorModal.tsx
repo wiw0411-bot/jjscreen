@@ -29,7 +29,7 @@ const sizeOptions = [
 ];
 
 const priceMaps: { [productTitle: string]: { [ageKey: string]: { [sizeKey: string]: number } } } = {
-  '촘촘 미세방충망': {
+  '미세 촘촘방충망': {
     '3y': { large: 35000, medium: 25000, small: 15000 },
     '5y': { large: 37000, medium: 27000, small: 17000 },
     '10y': { large: 40000, medium: 30000, small: 20000 },

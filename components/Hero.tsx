@@ -1,109 +1,120 @@
-import React, { useState } from 'react';
-import PriceCalculatorModal from './PriceCalculatorModal';
+import React from 'react';
 
+// App 컴포넌트와 타입을 일치시킵니다.
 interface Product {
   title: string;
-  features: string[];
   price: string;
   imageUrl: string;
   modalImageUrl: string;
   alt: string;
 }
 
-interface ProductCardProps extends Product {
-  onCheckPrice: (product: Product) => void;
+interface HeroProps {
+  onOpenModal: (product: Product) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ onCheckPrice, ...product }) => {
-  const { title, features, price, imageUrl, alt } = product;
-
-  return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform hover:shadow-xl transition-shadow duration-300">
-      <div className="w-full aspect-[4/5] bg-gray-100">
-        <img src={imageUrl} alt={alt} className="w-full h-full object-contain" />
-      </div>
-      <div className="p-3 sm:p-4 flex flex-col flex-grow">
-        <div className="flex-grow">
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 break-keep">{title}</h3>
-          <ul className="text-xs text-gray-600 mt-2 space-y-1">
-            {features.map((feature, index) => (
-              <li key={index} className="flex items-start min-h-10">
-                <i className="fas fa-check text-blue-500 mr-2 mt-1 flex-shrink-0"></i>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="mt-4">
-            <p className="text-base sm:text-lg font-bold text-gray-800 text-right mb-3">{parseInt(price).toLocaleString('ko-KR')}원~</p>
-            <button onClick={() => onCheckPrice(product)} className="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm sm:text-base">
-                가격확인
-            </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Hero: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  const handleOpenModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProduct(null);
-  };
-
-  const products: Product[] = [
-    {
-      title: '촘촘 미세방충망',
-      features: ['날벌레 90%차단', '깨끗하게 선명한 시야 확보', '반영구적 사용 가능한 내구성'],
-      price: '15000',
-      imageUrl: 'https://i.imgur.com/RJcHCVn.jpeg',
-      modalImageUrl: 'https://i.imgur.com/nJKYDKx.png',
-      alt: '촘촘 미세방충망 제품 이미지'
-    },
-    {
-      title: '블랙 스텐방충망',
-      features: ['녹과 부식에 강한 스테인리스', '반려동물이 있는 가정에 적합', '반영구적 사용 가능한 내구성'],
-      price: '25000',
-      imageUrl: 'https://i.imgur.com/bmJroTk.jpeg',
-      modalImageUrl: 'https://i.imgur.com/ZnKULw7.png',
-      alt: '블랙 스텐방충망 제품 이미지'
-    }
+const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
+  const fineMeshFeatures = [
+    '날벌레 90% 차단',
+    '깨끗하게 선명한 시야 확보',
+    '반영구적 사용 가능한 내구성',
   ];
 
+  const blackSteelFeatures = [
+    '녹과 부식에 강한 스테인리스',
+    '반려동물이 있는 가정에 적합',
+    '반영구적 사용 가능한 내구성',
+  ];
+
+  // 모달에 전달할 상품 데이터입니다. title은 PriceCalculatorModal의 priceMaps 키와 일치해야 합니다.
+  const fineMeshProduct: Product = {
+    title: '미세 촘촘방충망',
+    modalImageUrl: 'https://i.imgur.com/QxOtj3f.png',
+    alt: '미세촘촘방충망',
+    price: '', 
+    imageUrl: ''
+  };
+
+  const blackSteelProduct: Product = {
+    title: '블랙 스텐방충망',
+    modalImageUrl: 'https://i.imgur.com/QxOtj3f.png',
+    alt: '블랙스텐방충망',
+    price: '',
+    imageUrl: ''
+  };
+
   return (
-    <>
-      <section id="products" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="bg-white rounded-xl shadow-md p-6 md:p-8 mb-12 max-w-3xl mx-auto border border-gray-200">
-            <div className="text-center">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">대표 상품 및 가격 안내</h1>
-                <div className="text-base text-gray-600 mt-4 max-w-2xl mx-auto break-keep">
-                    <p>가장 많이 찾으시는 방충망을 합리적인 가격에 만나보세요.</p>
-                    <p className="mt-1">투명한 가격과 정직한 시공을 약속합니다.</p>
+    <section className="pt-16 bg-gray-100">
+      <div className="container mx-auto px-4 sm:px-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
+          <span className="animate-text-shimmer">실시간 견적 받기</span>
+        </h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Column 1: 미세촘촘방충망 */}
+          <div className="flex flex-col items-center">
+            <div className="relative mb-[-16px] z-10 animate-subtle-bounce">
+              <div className="bg-emerald-100 text-emerald-800 text-sm font-semibold px-4 py-2 rounded-full shadow-md">
+                가성비 끝판왕
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl border border-emerald-400 shadow-lg p-8 flex flex-col w-full h-full justify-between">
+              <div>
+                <div className="flex flex-col items-center text-center pt-8">
+                  <img src="https://i.imgur.com/jfGCSmh.png" alt="미세 촘촘방충망 아이콘" className="w-16 h-16 mb-4" />
+                  <h2 className="text-2xl font-bold text-gray-800">미세 촘촘방충망</h2>
                 </div>
+                <ul className="space-y-3 mt-4 text-gray-600">
+                  {fineMeshFeatures.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <i className="fas fa-check text-blue-500 mr-3"></i>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button 
+                onClick={() => onOpenModal(fineMeshProduct)}
+                className="w-1/2 mx-auto mt-6 bg-emerald-500 text-white font-bold py-3 rounded-lg hover:bg-emerald-600 transition-all duration-300 text-lg transform hover:scale-105 animate-pulse-emerald"
+              >
+                실시간 견적
+              </button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-8 max-w-4xl mx-auto">
-            {products.map((product, index) => (
-              <ProductCard key={index} {...product} onCheckPrice={handleOpenModal} />
-            ))}
+
+          {/* Column 2: 블랙스텐방충망 */}
+          <div className="flex flex-col items-center">
+            <div className="relative mb-[-16px] z-10 animate-subtle-bounce">
+                <div className="bg-sky-400 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
+                    트렌드 상품
+                </div>
+            </div>
+            <div className="bg-white rounded-2xl border border-sky-400 shadow-lg p-8 flex flex-col justify-between w-full h-full">
+              <div>
+                <div className="flex flex-col items-center text-center pt-8">
+                  <img src="https://i.imgur.com/M0JHz2T.png" alt="블랙 스텐방충망 아이콘" className="w-16 h-16 mb-4" />
+                  <h2 className="text-2xl font-bold text-gray-800">블랙 스텐방충망</h2>
+                </div>
+                <ul className="space-y-3 mt-4 text-gray-600">
+                  {blackSteelFeatures.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <i className="fas fa-check text-blue-500 mr-3"></i>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button 
+                onClick={() => onOpenModal(blackSteelProduct)}
+                className="w-1/2 mx-auto mt-6 bg-sky-500 text-white font-bold py-3 rounded-lg hover:bg-sky-600 transition-all duration-300 text-lg transform hover:scale-105 animate-pulse-sky"
+              >
+                실시간 견적
+              </button>
+            </div>
           </div>
         </div>
-      </section>
-      <PriceCalculatorModal 
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        product={selectedProduct}
-      />
-    </>
+      </div>
+    </section>
   );
 };
 

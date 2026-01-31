@@ -1,67 +1,54 @@
-
-import React, { useState, useEffect } from 'react';
-import AnnouncementBanner from './components/AnnouncementBanner';
+import React, { useState } from 'react';
+import SlidingBanner from './components/AnnouncementBanner';
 import Hero from './components/Hero';
-import Features from './components/Features';
+import Highlights from './components/Highlights';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
+import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import KakaoChatButton from './components/KakaoChatButton';
-import ContactForm from './components/ContactForm';
-import EventPopup from './components/EventPopup';
+import PriceCalculatorModal from './components/PriceCalculatorModal';
+
+// PriceCalculatorModal에 전달할 상품 정보의 타입을 정의합니다.
+interface Product {
+  title: string;
+  price: string;
+  imageUrl: string;
+  modalImageUrl: string;
+  alt: string;
+}
 
 const App: React.FC = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
-    const dismissedUntil = localStorage.getItem('popupDismissedUntil');
-    if (dismissedUntil) {
-      const dismissedTimestamp = parseInt(dismissedUntil, 10);
-      if (Date.now() < dismissedTimestamp) {
-        return; // Don't show popup if it's dismissed
-      }
-    }
-    
-    // Show popup after a short delay for better user experience
-    const timer = setTimeout(() => {
-        setIsPopupOpen(true);
-    }, 1500); // 1.5 second delay
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
+  const handleOpenModal = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
   };
 
-  const handleDismissPopupToday = () => {
-    const oneDayInMs = 24 * 60 * 60 * 1000;
-    const dismissalTimestamp = Date.now() + oneDayInMs;
-    localStorage.setItem('popupDismissedUntil', dismissalTimestamp.toString());
-    setIsPopupOpen(false);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null); // 모달이 닫힐 때 선택된 상품 정보도 초기화합니다.
   };
-
-  // Placeholder image for the event popup
-  const popupImageUrl = 'https://i.imgur.com/lB4tKmB.jpeg';
 
   return (
-    <div className="bg-white text-gray-800 font-sans">
-      <EventPopup
-        isOpen={isPopupOpen}
-        onClose={handleClosePopup}
-        onDismissToday={handleDismissPopupToday}
-        imageUrl={popupImageUrl}
-      />
-      <AnnouncementBanner />
+    <div className="bg-gray-100 text-gray-800 font-sans">
+      <SlidingBanner />
       <main>
-        <Hero />
-        <Features />
+        <Hero onOpenModal={handleOpenModal} />
+        <Highlights />
         <Testimonials />
         <FAQ />
         <ContactForm />
       </main>
       <KakaoChatButton />
       <Footer />
+      <PriceCalculatorModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        product={selectedProduct}
+      />
     </div>
   );
 };

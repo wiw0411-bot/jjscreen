@@ -1,173 +1,242 @@
+import React, { useState, useRef, useEffect } from 'react';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+// New data structure inspired by the screenshot
+const testimonialsData = [
+  {
+    reviewer: '김OO님',
+    overallRating: 5.0,
+    comment: '이사는 곳이 단지 정원뷰라 그런지 창문 열면 작은 벌레들이 들어와요... 여기 저기 알아보다가 가장 저렴해서 여기로 결정했는데... 젊은 사장님이 깔끔하게 교체해 주시고 가셔서 만족합니다. ^^',
+    ratings: {
+      '시공만족도': 5.0,
+      '가격만족도': 5.0,
+      '친절도': 5.0,
+      '전문성': 5.0,
+    },
+    imageUrl: 'https://i.imgur.com/OJjO8ue.jpeg',
+  },
+  {
+    reviewer: '박OO님',
+    overallRating: 4.8,
+    comment: '완전 추천합니다! 가격 이런 가격 못본것같아요. 추가 요금 일절x. 만족도 굿! 곧 아이를 낳게되서 그전에 방충망 바꾸고 싶어 여기저기 알아보다가 jj에서 했는데 진짜 합리적! 후회안합니다. 사장님 방문하시자마자 각 방 방충망 착착 떼어가셔서 지하주차장에서 작업 후 올라오셔서 다시 붙여주는 데 정말 손도 빠릅니다!',
+    ratings: {
+      '시공만족도': 5.0,
+      '가격만족도': 5.0,
+      '친절도': 4.5,
+      '전문성': 5.0,
+    },
+    imageUrl: 'https://i.imgur.com/L0Izf0J.jpeg',
+  },
+  {
+    reviewer: '최OO님',
+    overallRating: 5.0,
+    comment: '추가 사용 후기!! 촘촘망에 틈새방지까지 했더니 모기 잘물리는 남편이 확실히 모기가 줄어든다고 굿입니다. 👍👍👍 다들 건강한 여름 나시길~',
+    ratings: {
+      '시공만족도': 5.0,
+      '가격만족도': 5.0,
+      '친절도': 5.0,
+      '전문성': 5.0,
+    },
+    imageUrl: 'https://i.imgur.com/CGFxnWI.jpeg',
+  },
+  {
+    reviewer: '이OO님',
+    overallRating: 5.0,
+    comment: '고양이가 자꾸 방충망을 긁어서 찢어질까봐 걱정했는데, 튼튼한 블랙 스텐방충망으로 교체하고 나니 마음이 놓여요. 이제 안심하고 창문 열어놓을 수 있겠어요. 시공도 엄청 꼼꼼하게 해주셨어요!',
+    ratings: {
+      '시공만족도': 5.0,
+      '가격만족도': 4.5,
+      '친절도': 5.0,
+      '전문성': 5.0,
+    },
+    imageUrl: 'https://i.imgur.com/eykFDw1.jpeg',
+  },
+  {
+    reviewer: '정OO님',
+    overallRating: 4.9,
+    comment: '오래된 아파트라 샷시 상태가 안 좋아서 걱정했는데, 사장님께서 노하우로 깔끔하게 맞춰주셨습니다. 이전보다 훨씬 집이 깨끗해 보이고 벌레 걱정도 없어져서 너무 만족스럽습니다. 주변에도 추천하고 있어요.',
+    ratings: {
+      '시공만족도': 5.0,
+      '가격만족도': 4.8,
+      '친절도': 5.0,
+      '전문성': 5.0,
+    },
+    imageUrl: 'https://i.imgur.com/NccQwux.jpeg',
+  },
+  {
+    reviewer: '윤OO님',
+    overallRating: 5.0,
+    comment: '시간 약속 정확하게 지켜주시고, 작업도 신속하게 마무리해주셔서 좋았습니다. 방충망 교체 하나만으로도 이렇게까지 시야가 선명해질 줄 몰랐네요. 진작 할 걸 그랬어요. 감사합니다!',
+    ratings: {
+      '시공만족도': 5.0,
+      '가격만족도': 5.0,
+      '친절도': 5.0,
+      '전문성': 5.0,
+    },
+    imageUrl: 'https://i.imgur.com/fTjO6vo.jpeg',
+  },
+];
 
-interface TestimonialCardProps {
-  image: string;
-  title: string;
-  text: string;
-  isVisible: boolean;
-  onTypingComplete: () => void;
-}
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ image, title, text, isVisible, onTypingComplete }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [typedText, setTypedText] = useState('');
-  const [animationTriggered, setAnimationTriggered] = useState(false);
-
-  // onTypingComplete 콜백이 변경되어도 애니메이션이 재시작되지 않도록 ref에 최신 함수를 저장합니다.
-  const onTypingCompleteRef = useRef(onTypingComplete);
-  useEffect(() => {
-    onTypingCompleteRef.current = onTypingComplete;
-  }, [onTypingComplete]);
-  
-  const truncateLength = 75;
-  const isTruncatable = text.length > truncateLength;
-  const shortText = `${text.substring(0, truncateLength)}${isTruncatable ? '...' : ''}`;
-  
-  // 1. 카드가 화면에 보이면 애니메이션을 딱 한 번 트리거합니다.
-  useEffect(() => {
-    if (isVisible && !animationTriggered) {
-        setAnimationTriggered(true);
-    }
-  }, [isVisible, animationTriggered]);
-
-  // 2. 애니메이션이 트리거되면 타이핑 효과를 실행합니다.
-  useEffect(() => {
-    if (animationTriggered) {
-        let i = 0;
-        const targetText = shortText;
-        const intervalId = setInterval(() => {
-            if (i < targetText.length) {
-                setTypedText(targetText.substring(0, i + 1));
-                i++;
-            } else {
-                clearInterval(intervalId);
-                onTypingCompleteRef.current(); // ref에 저장된 최신 콜백을 실행합니다.
-            }
-        }, 15);
-
-        return () => clearInterval(intervalId);
-    }
-  }, [animationTriggered, shortText]);
-
-  const displayText = isExpanded ? text : typedText;
+const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 !== 0;
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 p-4 flex items-start gap-4 shadow-sm transition-all duration-500 hover:shadow-md ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-      <img src={image} alt={title} className="w-24 h-24 md:w-28 md:h-28 object-cover rounded-md flex-shrink-0" />
-      <div className="flex-grow flex flex-col self-stretch min-w-0">
-        <div className="flex items-center mb-1">
-          <div className="text-yellow-400 text-sm flex-shrink-0">
-            <i className="fas fa-star"></i>
-            <i className="fas fa-star"></i>
-            <i className="fas fa-star"></i>
-            <i className="fas fa-star"></i>
-            <i className="fas fa-star"></i>
+    <div className="flex items-center text-yellow-400">
+      {[...Array(fullStars)].map((_, i) => <i key={`full-${i}`} className="fas fa-star"></i>)}
+      {halfStar && <i className="fas fa-star-half-alt"></i>}
+      {[...Array(emptyStars)].map((_, i) => <i key={`empty-${i}`} className="far fa-star"></i>)}
+    </div>
+  );
+};
+
+const RatingBar: React.FC<{ label: string; score: number }> = ({ label, score }) => {
+  const widthPercentage = (score / 5) * 100;
+  return (
+    <div className="flex items-center text-sm">
+      <span className="w-20 text-gray-600 flex-shrink-0">{label}</span>
+      <div className="w-full bg-gray-200 rounded-full h-2 mx-3">
+        <div 
+          className="bg-yellow-400 h-2 rounded-full" 
+          style={{ width: `${widthPercentage}%` }}
+        ></div>
+      </div>
+      <span className="font-semibold text-gray-800 w-8 text-right">{score.toFixed(1)}</span>
+    </div>
+  );
+};
+
+// FIX: An interface can only extend a simple identifier, not a complex type expression like `(typeof testimonialsData)[0]`. Changed to a type alias using an intersection (&) to correctly combine the inferred type with additional properties.
+type TestimonialCardProps = (typeof testimonialsData)[0] & {
+  hasMargin?: boolean;
+};
+
+const TestimonialCard: React.FC<TestimonialCardProps> = ({ hasMargin = true, ...testimonial }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showMoreButton, setShowMoreButton] = useState(false);
+  const commentRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (commentRef.current) {
+        const isClamped = commentRef.current.scrollHeight > commentRef.current.clientHeight;
+        setShowMoreButton(isClamped);
+      }
+    };
+
+    // A brief delay before the first check ensures that the layout has stabilized,
+    // which is particularly important on mobile devices with dynamic widths.
+    const timeoutId = setTimeout(checkOverflow, 50);
+
+    // Re-check whenever the window is resized, as this can affect clamping.
+    window.addEventListener('resize', checkOverflow);
+
+    // Cleanup function to prevent memory leaks.
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkOverflow);
+    };
+  }, []);
+
+  return (
+    <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden ${hasMargin ? 'mb-8' : ''}`}>
+      <div className="p-6">
+        <div className="border rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div className="flex justify-center">
+            <img src={testimonial.imageUrl} alt="시공 후기 사진" className="w-56 h-56 rounded-lg object-cover" />
           </div>
-          <h3 className={`text-md font-bold text-gray-800 ml-3 ${!isExpanded ? 'truncate' : ''}`} title={title}>{title}</h3>
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">Perfect</span>
+            <span className="text-3xl font-bold text-gray-800">{testimonial.overallRating.toFixed(1)} <span className="text-lg font-medium text-gray-500">/ 5</span></span>
+            <StarRating rating={testimonial.overallRating} />
+          </div>
+          <div className="space-y-3 flex flex-col justify-center">
+              {Object.entries(testimonial.ratings).map(([label, score]) => (
+                  <RatingBar key={label} label={label} score={score} />
+              ))}
+          </div>
         </div>
-        <p className="text-gray-600 text-sm leading-relaxed flex-grow min-h-[60px]">
-          {displayText}
-        </p>
-        {isTruncatable && (
-          <div className="text-right mt-auto pt-1">
-            <button 
-              onClick={() => setIsExpanded(!isExpanded)} 
-              className="text-blue-600 font-semibold text-sm hover:underline"
+        <div className="mt-4">
+          <p 
+            ref={commentRef}
+            className={`text-gray-700 leading-relaxed break-keep ${!isExpanded ? 'line-clamp-3' : ''}`}
             >
+              <span className="font-semibold text-gray-900">{testimonial.reviewer}: </span>
+              {testimonial.comment}
+          </p>
+          {showMoreButton && (
+              <button 
+              onClick={() => setIsExpanded(!isExpanded)} 
+              className="text-sm font-semibold text-blue-600 hover:underline mt-2 focus:outline-none"
+              aria-expanded={isExpanded}
+              >
               {isExpanded ? '접기' : '더보기'}
-            </button>
-          </div>
-        )}
+              </button>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 const Testimonials: React.FC = () => {
-  const [visibleCardIndex, setVisibleCardIndex] = useState(-1);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  const testimonials = [
-    {
-      image: 'https://i.imgur.com/OJjO8ue.jpeg',
-      title: '강력 추천합니다',
-      text: '이사는 곳이 단지 정원뷰라 그런지 창문 열면 작은 벌레들이 들어와요... 방충망 너무 오래되어 교체했는데 확실히 벌레를 막아주니 저녁엔 창문 열어 놓고 있어요... 여기 저기 알아보다가 가장 저렴해서 여기로 결정했는데... 젊은 사장님이 깔끔하게 교체해 주시고 가셔서 만족합니다. ^^'
-    },
-    {
-      image: 'https://i.imgur.com/L0Izf0J.jpeg',
-      title: '물구멍 스티커 서비스 감사해욧!',
-      text: '완전 추천합니다! 가격 이런 가격 못본것같아요. 추가 요금 일절x. 만족도 굿! 곧 아이를 낳게되서 그전에 방충망 바꾸고 싶어 여기저기 알아보다가 jj에서 했는데 진짜 합리적! 후회안만합니다. 사장님 방문하시자마자 각 방 방충망 착착 떼어가셔서 지하주차장에서 작업 후 올라오셔서 다시 붙여주는 데 정말 손도 빠릅니다!'
-    },
-    {
-      image: 'https://i.imgur.com/CGFxnWI.jpeg',
-      title: '추천,친절,가격 모두 별 다섯개 드리고 싶은 곳이에요 정말!',
-      text: '추가 사용 후기!! 촘촘망에 틈새방지까지 했더니 모기 잘물리는 남편이 확실히 모기가 줄어든다고 굿입니다. 👍👍👍 다들 건강한 여름 나시길~'
-    },
-    {
-      image: 'https://i.imgur.com/NccQwux.jpeg',
-      title: '엄청 촘촘해서 모기 절대 못들어오네요!',
-      text: '지인소개로 JJ방충망 알게되서 시공했는데요 ㅋㅋ 우선 가격이 진짜 싸요! 방충망이 없는거 같이 촘촘하면서도 맑고요~ 마음에 쏙들어서 엄마네랑 동생네도 예약 했네요!! 혹시 방충망이 녹슬고 저희처럼 구멍 나셨음 추천합니다!'
-    },
-    {
-      image: 'https://i.imgur.com/eykFDw1.jpeg',
-      title: '정말 저렴하게 시공했어요!!',
-      text: '부모님 댁에 오래된 방충망인데 무더운 여름전에 깔끔하게 수리했습니다. 수리 않나 오래된 집이라 방충망이 항상 거슬렸는데 JJ방충망 사장님이 말끔하게 만들어 주셨습니다. 기본 메쉬망보다 엄청 촘촘해서 메쉬망이 없는것 같은 착각이 드네요. 다른 업체들은 기본 알루미늄망 이여서 촘촘망으로 하려면 추가금도 내야되는데 저렴하게 잘 수리했습니다. 여름 오기전에 미리들 준비하세요! 사장님 사업 번창하세요!!'
-    },
-    {
-      image: 'https://i.imgur.com/fTjO6vo.jpeg',
-      title: '정말 만족합니다👍',
-      text: '후기 잘 안남기는데.. 넘 만족해서 남겨요 젊은 사장님 꼼꼼하시고 무척 친절하세요. 추가금없이 이 가격은 그 어느곳도 없을듯요. 방충망 퀄리티도 최고입니다 ㅋ 강추합니다~~~~'
-    },
-  ];
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisibleCardIndex(0);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.1 }
-    );
+    const slider = scrollRef.current;
+    if (!slider) return;
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+    const interval = setInterval(() => {
+      if (document.hidden) return;
 
-    return () => {
-      if (sectionRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        observer.unobserve(sectionRef.current);
+      const card = slider.querySelector(':scope > div') as HTMLElement;
+      if (!card) return;
+
+      const cardWidth = card.offsetWidth;
+      const gap = 16;
+      
+      const isAtEnd = slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 1;
+
+      if (isAtEnd) {
+        slider.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        slider.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
       }
-    };
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const handleTypingComplete = useCallback(() => {
-    setVisibleCardIndex(prevIndex => {
-        if (prevIndex < testimonials.length - 1) {
-            return prevIndex + 1;
-        }
-        return prevIndex;
-    });
-  }, [testimonials.length]);
-
   return (
-    <section id="testimonials" ref={sectionRef} className="py-20 bg-gray-50">
+    <section id="testimonials" className="py-20 bg-white">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold">생생한 시공 후기</h2>
-          <p className="text-base text-gray-600 mt-4">실제 고객님들이 남겨주신 소중한 후기입니다.</p>
+        <div className="max-w-4xl mx-auto mb-12 h-28 md:h-36 rounded-lg overflow-hidden shadow-lg">
+            {/* Mobile Banner */}
+            <img src="https://i.imgur.com/QFIW7gN.jpeg" alt="생생한 시공 후기" className="w-full h-full object-cover md:hidden" />
+            {/* Desktop Banner */}
+            <img src="https://i.imgur.com/ZzDTMaO.jpeg" alt="생생한 시공 후기" className="w-full h-full object-cover hidden md:block" />
         </div>
-        <div className="max-w-4xl mx-auto space-y-6">
-          {testimonials.slice(0, 6).map((testimonial, index) => (
-            <TestimonialCard 
-              key={index} 
-              {...testimonial} 
-              isVisible={index <= visibleCardIndex}
-              onTypingComplete={index === visibleCardIndex ? handleTypingComplete : () => {}}
-            />
+        
+        {/* Mobile Carousel */}
+        <div className="md:hidden">
+            <div 
+                ref={scrollRef}
+                className="flex overflow-x-auto snap-x snap-mandatory py-4 -mx-6 px-6 space-x-4 no-scrollbar"
+            >
+                <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+                {testimonialsData.map((testimonial, index) => (
+                    <div key={index} className="snap-start w-[85%] sm:w-4/5 flex-shrink-0">
+                        <TestimonialCard {...testimonial} hasMargin={false} />
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Desktop List */}
+        <div className="hidden md:block max-w-4xl mx-auto">
+          {testimonialsData.map((testimonial, index) => (
+            <TestimonialCard key={index} {...testimonial} />
           ))}
         </div>
       </div>
