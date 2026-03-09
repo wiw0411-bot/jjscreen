@@ -1,2 +1,6 @@
-/* This file is intentionally left blank. 
-   It exists to prevent a 404 error in the browser console. */
+@import "tailwindcss";
+
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+    font-weight: 400;
+}

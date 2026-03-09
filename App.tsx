@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import SlidingBanner from './components/AnnouncementBanner';
 import Hero from './components/Hero';
 import Highlights from './components/Highlights';
+import ConstructionCases from './components/ConstructionCases';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import ContactForm from './components/ContactForm';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
       <main>
         <Hero onOpenModal={handleOpenModal} />
         <Highlights />
+        <ConstructionCases />
         <Testimonials />
         <FAQ />
         <ContactForm />
