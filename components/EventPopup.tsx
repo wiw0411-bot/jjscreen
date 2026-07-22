@@ -9,7 +9,7 @@ interface EventPopupProps {
   onOpenCalculator?: () => void;
 }
 
-const POPUP_DISMISS_KEY = 'jj_event_popup_dismissed_until_v3';
+const POPUP_DISMISS_KEY = 'jj_event_popup_dismissed_until_v4';
 
 const EventPopup: React.FC<EventPopupProps> = ({
   isOpen: externalIsOpen,
@@ -17,14 +17,29 @@ const EventPopup: React.FC<EventPopupProps> = ({
   imageUrl,
   onOpenCalculator
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [imgSrc, setImgSrc] = useState<string>(userPopupImg);
+  // Initialize isOpen synchronously to avoid flicker on mount
+  const [isOpen, setIsOpen] = useState<boolean>(() => {
+    if (externalIsOpen !== undefined) return externalIsOpen;
+    try {
+      const dismissedUntil = localStorage.getItem(POPUP_DISMISS_KEY);
+      if (dismissedUntil) {
+        const dismissTime = parseInt(dismissedUntil, 10);
+        if (Date.now() < dismissTime) {
+          return false;
+        }
+      }
+    } catch (e) {
+      // localStorage disabled or error
+    }
+    return true;
+  });
 
-  useEffect(() => {
-    // Clear legacy dismiss keys so user can see updated popup immediately
-    localStorage.removeItem('jj_event_popup_dismissed_until');
-    localStorage.removeItem('jj_event_popup_dismissed_until_v2');
-  }, []);
+  const [imgSrc, setImgSrc] = useState<string>(() => {
+    if (imageUrl && !imageUrl.includes('imgur.com/a/')) {
+      return imageUrl;
+    }
+    return userPopupImg;
+  });
 
   useEffect(() => {
     if (imageUrl && !imageUrl.includes('imgur.com/a/')) {
@@ -37,19 +52,7 @@ const EventPopup: React.FC<EventPopupProps> = ({
   useEffect(() => {
     if (externalIsOpen !== undefined) {
       setIsOpen(externalIsOpen);
-      return;
     }
-
-    // Check localStorage if dismissed today
-    const dismissedUntil = localStorage.getItem(POPUP_DISMISS_KEY);
-    if (dismissedUntil) {
-      const dismissTime = parseInt(dismissedUntil, 10);
-      if (Date.now() < dismissTime) {
-        setIsOpen(false);
-        return;
-      }
-    }
-    setIsOpen(true);
   }, [externalIsOpen]);
 
   const handleClose = () => {
@@ -59,8 +62,12 @@ const EventPopup: React.FC<EventPopupProps> = ({
 
   const handleDismissToday = () => {
     // Dismiss for 24 hours
-    const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-    localStorage.setItem(POPUP_DISMISS_KEY, tomorrow.toString());
+    try {
+      const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+      localStorage.setItem(POPUP_DISMISS_KEY, tomorrow.toString());
+    } catch (e) {
+      // ignore
+    }
     handleClose();
   };
 
@@ -68,6 +75,12 @@ const EventPopup: React.FC<EventPopupProps> = ({
     if (onOpenCalculator) {
       handleClose();
       onOpenCalculator();
+    }
+  };
+
+  const handleImageError = () => {
+    if (imgSrc !== '/user_popup.png') {
+      setImgSrc('/user_popup.png');
     }
   };
 
@@ -106,7 +119,8 @@ const EventPopup: React.FC<EventPopupProps> = ({
             src={imgSrc} 
             alt="JJ방충망 이벤트 공지 팝업" 
             className="w-full h-auto object-contain block mx-auto" 
-            onError={() => setImgSrc(userPopupImg)}
+            referrerPolicy="no-referrer"
+            onError={handleImageError}
           />
         </div>
 
