@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import userPopupImg from '../src/assets/images/user_popup.png';
-import { userPopupDataUrl } from '../src/assets/images/userPopupBase64';
 
 interface EventPopupProps {
   isOpen?: boolean;
@@ -86,8 +85,6 @@ const EventPopup: React.FC<EventPopupProps> = ({
       setImgSrc('/user_popup.png');
     } else if (imgSrc === '/user_popup.png') {
       setImgSrc('https://i.imgur.com/puddVgM.png');
-    } else if (imgSrc !== userPopupDataUrl) {
-      setImgSrc(userPopupDataUrl);
     }
   };
 
@@ -126,6 +123,10 @@ const EventPopup: React.FC<EventPopupProps> = ({
             src={imgSrc} 
             alt="JJ방충망 이벤트 공지 팝업" 
             className="w-full h-auto object-contain block mx-auto" 
+            loading="eager"
+            // @ts-ignore
+            fetchPriority="high"
+            decoding="async"
             referrerPolicy="no-referrer"
             onError={handleImageError}
           />

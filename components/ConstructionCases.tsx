@@ -171,7 +171,7 @@ const ConstructionCases: React.FC = () => {
 
   const ImageItem = ({ src, alt }: { src: string; alt: string }) => (
     <div className="flex-shrink-0 w-28 h-28 sm:w-64 sm:h-64 bg-gray-100 rounded-lg mx-1 sm:mx-2 overflow-hidden border border-gray-200">
-      <img src={src} alt={alt} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+      <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
     </div>
   );
 

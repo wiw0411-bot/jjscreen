@@ -27,6 +27,9 @@ const Gallery: React.FC = () => {
                 src={src} 
                 alt={`시공 사례 ${index + 1}`} 
                 className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
               />
             </div>
           ))}
