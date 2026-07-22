@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import userPopupImg from '../src/assets/images/user_popup.png';
+import { userPopupDataUrl } from '../src/assets/images/userPopupBase64';
 
 interface EventPopupProps {
   isOpen?: boolean;
@@ -9,7 +10,7 @@ interface EventPopupProps {
   onOpenCalculator?: () => void;
 }
 
-const POPUP_DISMISS_KEY = 'jj_event_popup_dismissed_until_v4';
+const POPUP_DISMISS_KEY = 'jj_event_popup_dismissed_until_v5';
 
 const EventPopup: React.FC<EventPopupProps> = ({
   isOpen: externalIsOpen,
@@ -38,14 +39,14 @@ const EventPopup: React.FC<EventPopupProps> = ({
     if (imageUrl && !imageUrl.includes('imgur.com/a/')) {
       return imageUrl;
     }
-    return userPopupImg;
+    return userPopupImg || '/user_popup.png';
   });
 
   useEffect(() => {
     if (imageUrl && !imageUrl.includes('imgur.com/a/')) {
       setImgSrc(imageUrl);
     } else {
-      setImgSrc(userPopupImg);
+      setImgSrc(userPopupImg || '/user_popup.png');
     }
   }, [imageUrl]);
 
@@ -79,8 +80,14 @@ const EventPopup: React.FC<EventPopupProps> = ({
   };
 
   const handleImageError = () => {
-    if (imgSrc !== '/user_popup.png') {
+    if (imgSrc === imageUrl && imageUrl) {
+      setImgSrc(userPopupImg);
+    } else if (imgSrc === userPopupImg) {
       setImgSrc('/user_popup.png');
+    } else if (imgSrc === '/user_popup.png') {
+      setImgSrc('https://i.imgur.com/puddVgM.png');
+    } else if (imgSrc !== userPopupDataUrl) {
+      setImgSrc(userPopupDataUrl);
     }
   };
 
