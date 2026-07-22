@@ -3,14 +3,12 @@ import React, { useState, useEffect } from 'react';
 // 데스크톱용 배너 이미지
 const desktopBannerImages = [
   'https://i.imgur.com/7YYqsAe.jpeg',
-  'https://i.imgur.com/wGBmXCL.jpeg',
   'https://i.imgur.com/TOXF1UJ.jpeg',
 ];
 
 // 모바일용 배너 이미지
 const mobileBannerImages = [
   'https://i.imgur.com/twgL7Qg.jpeg',
-  'https://i.imgur.com/mo0ewWR.jpeg',
   'https://i.imgur.com/Q9rr2Dc.jpeg',
 ];
 

@@ -9,6 +9,7 @@ import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import KakaoChatButton from './components/KakaoChatButton';
 import PriceCalculatorModal from './components/PriceCalculatorModal';
+import EventPopup from './components/EventPopup';
 
 // PriceCalculatorModal에 전달할 상품 정보의 타입을 정의합니다.
 interface Product {
@@ -50,6 +51,9 @@ const App: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         product={selectedProduct}
+      />
+      <EventPopup 
+        onOpenCalculator={() => handleOpenModal({ title: '미세촘촘방충망 30메쉬', price: '실시간 견적', imageUrl: '', modalImageUrl: '', alt: '미세촘촘방충망' })}
       />
     </div>
   );
