@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
             <h4 className="text-base font-semibold text-white mb-4">업체 정보</h4>
             <ul className="space-y-2 text-sm">
               <li>상호: JJ방충망</li>
-              <li>대표: 주동준</li>
+              <li>대표: 주태형</li>
               <li>전화: 010-2846-9820</li>
             </ul>
           </div>
